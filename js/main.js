@@ -4,6 +4,7 @@ var album;
 
 $(document).ready(function () {
   remoteStorage.access.claim('pictures', 'rw');
+  remoteStorage.caching.enable('/public/pictures/Camera/');
   remoteStorage.displayWidget();
   remoteStorage.on('connected', showApp);
   remoteStorage.on('disconnected', hideApp);
