@@ -51,7 +51,7 @@ $(document).on({
     $('#album').append('<span id="imagespinner" width="160" height="120"><img src="images/ajax-loader.gif"></span>');
     album.store(type, filename, ab).then(function (url) {
       $('#imagespinner').remove();
-      $('#album').append('<a class="fancybox" href="' + url + '" rel="gHost" title="<a href=' + url + ' download=' + filename + ' title=\'Download this picture!\'>Download</a>"><img src="' + url + '"  width="160" height="120" title="' + filename + '"></img></a>').fadeIn('slow');
+      // $('#album').append('<a class="fancybox" href="' + url + '" rel="gHost" title="<a href=' + url + ' download=' + filename + ' title=\'Download this picture!\'>Download</a>"><img src="' + url + '"  width="160" height="120" title="' + filename + '"></img></a>').fadeIn('slow');
       return false;
     });
   }
@@ -62,14 +62,33 @@ function displayPic() {
   album = remoteStorage.pictures.openPublicAlbum('Camera');
 
   album.list().then(function (objects) {
-    objects.forEach(function (item) {
-      var url = album.getPictureURL(item);
-      $('#album').append('<a class="fancybox" href="' + url + '" rel="gHost" title="<a href=' + url + ' download=' + item + ' title=\'Download this picture!\'>Download</a>"><img src="' + url + '" id="' + item + '" width="160" height="120" title="' + item + '"></img></a>');
-    });
+    // objects.forEach(function (item) {
+    //   var url = album.getPictureURL(item);
+    //   $('#album').append('<a class="fancybox" href="' + url + '" rel="gHost" title="<a href=' + url + ' download=' + item + ' title=\'Download this picture!\'>Download</a>"><img src="' + url + '" id="' + item + '" width="160" height="120" title="' + item + '"></img></a>');
+    // });
     $(".fancybox").fancybox();
     $('#spinner').hide();
     $('#takePhoto').show();
   });
+
+  album.client.on('change', function(event) {
+    console.log('change event', event);
+
+    var fileReader = new FileReader();
+    var filename = event.relativePath;
+    var url = album.getPictureURL(filename);
+
+    // FIXME type has to be hard coded, because remote change events don't have newContentType set
+    // var blob = new Blob([event.newValue], {type: event.newContentType});
+    var blob = new Blob([event.newValue], {type: 'image/jpeg; charset=binary'});
+
+    fileReader.onload = function (evt) {
+      var result = evt.target.result;
+      $('#album').append('<a class="fancybox" href="' + url + '" rel="gHost" title="<a href=' + url + ' download=' + filename + ' title=\'Download this picture!\'>Download</a>"><img src="' + result + '" id="' + filename + '" width="160" height="120" title="' + filename + '"></img></a>');
+    };
+    fileReader.readAsDataURL(blob);
+  });
+
 }
 
 function showApp() {
